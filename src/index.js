@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ExecutionEnvironment from 'exenv';
 import Animate from 'react-move/Animate';
-import * as easing from 'd3-ease';
+import {easeCircleOut}  from 'd3-ease';
 import { PagingDots, PreviousButton, NextButton } from './default-controls';
 import Transitions from './all-transitions';
 import AnnounceSlide, {
@@ -54,7 +54,7 @@ export default class Carousel extends React.Component {
     this.state = {
       currentSlide: this.props.slideIndex,
       dragging: false,
-      easing: this.props.disableAnimation ? '' : easing.easeCircleOut,
+      easing: this.props.disableAnimation ? '' : easeCircleOut,
       hasInteraction: false, // to remove animation from the initial slide on the page load when non-default slideIndex is used
       isWrappingAround: false,
       left: 0,
