@@ -8,9 +8,9 @@ Use Ctrl+C to close it
     "configuration\nThe 'mode' option has not been set, webpack will fallback to 'production' for this value. Set 'mode' option to 'development' or 'production' to enable defaults for each environment.\nYou can also set it to 'none' to disable any default behavior. Learn more: https://webpack.js.org/concepts/mode/"
   ],
   "version": "4.19.1",
-  "hash": "266fb206c2505e9360e9",
-  "time": 3196,
-  "builtAt": 1567982757356,
+  "hash": "2ce4ba19abb22df08a48",
+  "time": 3070,
+  "builtAt": 1567989988215,
   "publicPath": "/assets/",
   "outputPath": "/Users/formidablejones/nuka-carousel-fork",
   "assetsByChunkName": {
@@ -19,7 +19,7 @@ Use Ctrl+C to close it
   "assets": [
     {
       "name": "main.js",
-      "size": 197849,
+      "size": 197511,
       "chunks": [
         0
       ],
@@ -60,14 +60,14 @@ Use Ctrl+C to close it
       "rendered": true,
       "initial": true,
       "entry": true,
-      "size": 280791,
+      "size": 280804,
       "names": [
         "main"
       ],
       "files": [
         "main.js"
       ],
-      "hash": "da543f936a827f1ac873",
+      "hash": "6b5f01eedf2700b21682",
       "siblings": [],
       "parents": [],
       "children": [],
@@ -96,8 +96,8 @@ Use Ctrl+C to close it
               "identifier": "multi ./demo/app.js",
               "name": "multi ./demo/app.js",
               "profile": {
-                "factory": 0,
-                "building": 2
+                "factory": 1,
+                "building": 1
               }
             },
             {
@@ -106,14 +106,14 @@ Use Ctrl+C to close it
               "name": "./demo/app.js",
               "profile": {
                 "factory": 21,
-                "building": 460
+                "building": 487
               }
             }
           ],
           "profile": {
-            "factory": 286,
+            "factory": 275,
             "building": 5,
-            "dependencies": 7
+            "dependencies": 3
           },
           "failed": false,
           "errors": 0,
@@ -260,8 +260,8 @@ Use Ctrl+C to close it
               "identifier": "multi ./demo/app.js",
               "name": "multi ./demo/app.js",
               "profile": {
-                "factory": 0,
-                "building": 2
+                "factory": 1,
+                "building": 1
               }
             },
             {

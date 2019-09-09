@@ -36,6 +36,7 @@ export default class Carousel extends React.Component {
     this.displayName = 'Carousel';
     this.clickDisabled = false;
     this.isTransitioning = false;
+    this.timers = [];
     this.touchObject = {};
     this.controlsMap = [
       { funcName: 'renderTopLeftControls', key: 'TopLeft' },
@@ -61,6 +62,7 @@ export default class Carousel extends React.Component {
       slideCount: getValidChildren(this.props.children).length,
       top: 0,
       wrapToIndex: null,
+      readyStateChanged: 0,
       ...calcSomeInitialState(this.props)
     };
 
@@ -172,6 +174,14 @@ export default class Carousel extends React.Component {
         this.setSlideHeightAndWidth();
       }
     }
+
+    const { slideHeight } = this.calcSlideHeightAndWidth();
+    const heightMismatches = slideHeight !== prevState.slideHeight;
+    // When using dynamic content in a slide, it is possible for the slide height to be inaccurate. Here, double check that the height is correct once the component has mounted and the `readyStateChange` event has fired.
+    // See #521 and https://github.com/FormidableLabs/nuka-carousel/blob/fea63242a8b2fb69c65689efe615d0feb9b2d1ff/README.md#resizing-height-issue
+    if (this.mounted && prevState.readyStateChanged > 0 && heightMismatches) {
+      this.setDimensions();
+    }
   }
 
   componentWillUnmount() {
@@ -180,6 +190,9 @@ export default class Carousel extends React.Component {
     this.stopAutoplay();
     // see https://github.com/facebook/react/issues/3417#issuecomment-121649937
     this.mounted = false;
+    for (let i = 0; i < this.timers.length; i++) {
+      clearTimeout(this.timers[i]);
+    }
   }
 
   establishChildNodesMutationObserver() {
@@ -234,7 +247,7 @@ export default class Carousel extends React.Component {
         this.handleMouseOver();
 
         if (this.props.onDragStart) {
-          this.props.onDragStart();
+          this.props.onDragStart(e);
         }
 
         this.setState({
@@ -319,7 +332,7 @@ export default class Carousel extends React.Component {
         };
 
         if (this.props.onDragStart) {
-          this.props.onDragStart();
+          this.props.onDragStart(e);
         }
 
         this.setState({
@@ -468,9 +481,11 @@ export default class Carousel extends React.Component {
     }
 
     // wait for `handleClick` event before resetting clickDisabled
-    setTimeout(() => {
-      this.clickDisabled = false;
-    }, 0);
+    this.timers.push(
+      setTimeout(() => {
+        this.clickDisabled = false;
+      }, 0)
+    );
     this.touchObject = {};
 
     this.setState({
@@ -616,15 +631,14 @@ export default class Carousel extends React.Component {
     }
 
     return {
-      tx: this.props.vertical ? 0 : offset,
-      ty: this.props.vertical ? offset : 0
+      tx: [this.props.vertical ? 0 : offset],
+      ty: [this.props.vertical ? offset : 0]
     };
   }
 
   isEdgeSwiping() {
     const { slideCount, slideWidth, slideHeight, slidesToShow } = this.state;
     const { tx, ty } = this.getOffsetDeltas();
-
     if (this.props.vertical) {
       const rowHeight = slideHeight / slidesToShow;
       const slidesLeftToShow = slideCount - slidesToShow;
@@ -679,13 +693,15 @@ export default class Carousel extends React.Component {
             wrapToIndex: index
           }),
           () => {
-            setTimeout(() => {
-              this.resetAutoplay();
-              this.isTransitioning = false;
-              if (index !== previousSlide) {
-                this.props.afterSlide(0);
-              }
-            }, props.speed);
+            this.timers.push(
+              setTimeout(() => {
+                this.resetAutoplay();
+                this.isTransitioning = false;
+                if (index !== previousSlide) {
+                  this.props.afterSlide(0);
+                }
+              }, props.speed)
+            );
           }
         );
         return;
@@ -705,13 +721,15 @@ export default class Carousel extends React.Component {
             wrapToIndex: index
           }),
           () => {
-            setTimeout(() => {
-              this.resetAutoplay();
-              this.isTransitioning = false;
-              if (index !== previousSlide) {
-                this.props.afterSlide(this.state.slideCount - 1);
-              }
-            }, props.speed);
+            this.timers.push(
+              setTimeout(() => {
+                this.resetAutoplay();
+                this.isTransitioning = false;
+                if (index !== previousSlide) {
+                  this.props.afterSlide(this.state.slideCount - 1);
+                }
+              }, props.speed)
+            );
           }
         );
         return;
@@ -725,13 +743,15 @@ export default class Carousel extends React.Component {
         currentSlide: index
       },
       () =>
-        setTimeout(() => {
-          this.resetAutoplay();
-          this.isTransitioning = false;
-          if (index !== previousSlide) {
-            this.props.afterSlide(index);
-          }
-        }, props.speed)
+        this.timers.push(
+          setTimeout(() => {
+            this.resetAutoplay();
+            this.isTransitioning = false;
+            if (index !== previousSlide) {
+              this.props.afterSlide(index);
+            }
+          }, props.speed)
+        )
     );
   }
 
@@ -797,6 +817,11 @@ export default class Carousel extends React.Component {
   }
 
   onReadyStateChange() {
+    // When using dynamic content in a slide, it is possible that `readystatechange` will fire before the component has finished mounting, which means `this.state.slideHeight` remains 0, instead of the correct height. Tracking this in state will trigger `componentDidUpdate` which can set the correct height.
+    // See #521 and https://github.com/FormidableLabs/nuka-carousel/blob/fea63242a8b2fb69c65689efe615d0feb9b2d1ff/README.md#resizing-height-issue
+    this.setState({
+      readyStateChanged: this.state.readyStateChanged + 1
+    });
     this.setDimensions();
   }
 
