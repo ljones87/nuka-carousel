@@ -1,4 +1,5 @@
 const path = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 module.exports = {
   output: {
@@ -20,6 +21,9 @@ module.exports = {
     historyApiFallback: true,
     hot: false
   },
+  plugins: [
+    new BundleAnalyzerPlugin()
+  ],
 
   module: {
     rules: [
